@@ -2,7 +2,7 @@ from fastapi import FastAPI, BackgroundTasks
 from functions.users import check_email, test_add
 from pydantic import BaseModel
 import os 
-from functions.email import send_email_background
+from functions.email import send_verification_email
 
 app = FastAPI()
 
@@ -14,6 +14,8 @@ class User(BaseModel):
 @app.post("/signup")
 def create_user(user: User):
 
+    send_verification_email("watruluck@gmail.com", "Will T")
+
     if (check_email(user.email)):
         return -1
 
@@ -21,16 +23,6 @@ def create_user(user: User):
         
         response = test_add(user.email, user.name, user.password)
         return response.data
-
-# ----- email -----
-@app.post("/send_email")
-async def send_email(to_email: str, background_tasks: BackgroundTasks):
-    subject = "Welcome to My App"
-    body = "Thanks for signing up!"
-
-    # Run sending in background (so FastAPI doesn’t block)
-    background_tasks.add_task(send_email_background, to_email, subject, body)
-    return {"message": f"Email will be sent to {to_email}"}
 
 
 # @app.post("/users/")
