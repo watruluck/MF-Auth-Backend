@@ -5,9 +5,9 @@ from email.mime.multipart import MIMEMultipart
 SENDER_EMAIL = "watruluck@gmail.com"
 SENDER_PASSWORD = "wzva svui jsma kpuu"  # ⚠️ Not your Gmail password — use an "App Password"
 
-def send_verification_email(to_email: str, user: str):
+def send_verification_email(to_email: str, user: str, token: str):
     msg = MIMEMultipart()
-    body = "linktoverify.com"
+    body = "linktoverify.com/token=" + token
     msg["From"] = SENDER_EMAIL
     msg["To"] = to_email
     msg["Subject"] = "Hello " + user + ", please verify your email"

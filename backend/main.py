@@ -3,6 +3,8 @@ from functions.users import check_email, test_add
 from pydantic import BaseModel
 import os 
 from functions.email import send_verification_email
+from functions.users import add_user, check_email, test_add, update_verification_string
+import secrets
 
 app = FastAPI()
 
@@ -14,7 +16,15 @@ class User(BaseModel):
 @app.post("/signup")
 def create_user(user: User):
 
-    send_verification_email("watruluck@gmail.com", "Will T")
+    if check_email(user.email):
+        return -1
+
+    token = secrets.token_urlsafe(16)
+
+    if (update_verification_string(user.email, token) == False):
+        return -2
+
+    send_verification_email(user.email, user.name, token)
 
     if (check_email(user.email)):
         return -1
@@ -23,6 +33,10 @@ def create_user(user: User):
         
         response = test_add(user.email, user.name, user.password)
         return response.data
+
+@app.post("/verify/{token}")
+def create_user(token: str):
+    
 
 
 # @app.post("/users/")
