@@ -1,0 +1,197 @@
+import chess
+
+# Evaluating the board
+pawntable = [
+    0, 0, 0, 0, 0, 0, 0, 0,
+    5, 10, 10, -20, -20, 10, 10, 5,
+    5, -5, -10, 0, 0, -10, -5, 5,
+    0, 0, 0, 20, 20, 0, 0, 0,
+    5, 5, 10, 25, 25, 10, 5, 5,
+    10, 10, 20, 30, 30, 20, 10, 10,
+    50, 50, 50, 50, 50, 50, 50, 50,
+    0, 0, 0, 0, 0, 0, 0, 0]
+
+knightstable = [
+    -50, -40, -30, -30, -30, -30, -40, -50,
+    -40, -20, 0, 5, 5, 0, -20, -40,
+    -30, 5, 10, 15, 15, 10, 5, -30,
+    -30, 0, 15, 20, 20, 15, 0, -30,
+    -30, 5, 15, 20, 20, 15, 5, -30,
+    -30, 0, 10, 15, 15, 10, 0, -30,
+    -40, -20, 0, 0, 0, 0, -20, -40,
+    -50, -40, -30, -30, -30, -30, -40, -50]
+
+bishopstable = [
+    -20, -10, -10, -10, -10, -10, -10, -20,
+    -10, 5, 0, 0, 0, 0, 5, -10,
+    -10, 10, 10, 10, 10, 10, 10, -10,
+    -10, 0, 10, 10, 10, 10, 0, -10,
+    -10, 5, 5, 10, 10, 5, 5, -10,
+    -10, 0, 5, 10, 10, 5, 0, -10,
+    -10, 0, 0, 0, 0, 0, 0, -10,
+    -20, -10, -10, -10, -10, -10, -10, -20]
+
+rookstable = [
+    0, 0, 0, 5, 5, 0, 0, 0,
+    -5, 0, 0, 0, 0, 0, 0, -5,
+    -5, 0, 0, 0, 0, 0, 0, -5,
+    -5, 0, 0, 0, 0, 0, 0, -5,
+    -5, 0, 0, 0, 0, 0, 0, -5,
+    -5, 0, 0, 0, 0, 0, 0, -5,
+    5, 10, 10, 10, 10, 10, 10, 5,
+    0, 0, 0, 0, 0, 0, 0, 0]
+
+queenstable = [
+    -20, -10, -10, -5, -5, -10, -10, -20,
+    -10, 0, 0, 0, 0, 0, 0, -10,
+    -10, 5, 5, 5, 5, 5, 0, -10,
+    0, 0, 5, 5, 5, 5, 0, -5,
+    -5, 0, 5, 5, 5, 5, 0, -5,
+    -10, 0, 5, 5, 5, 5, 0, -10,
+    -10, 0, 0, 0, 0, 0, 0, -10,
+    -20, -10, -10, -5, -5, -10, -10, -20]
+
+kingstable = [
+    20, 30, 10, 0, 0, 10, 30, 20,
+    20, 20, 0, 0, 0, 0, 20, 20,
+    -10, -20, -20, -20, -20, -20, -20, -10,
+    -20, -30, -30, -40, -40, -30, -30, -20,
+    -30, -40, -40, -50, -50, -40, -40, -30,
+    -30, -40, -40, -50, -50, -40, -40, -30,
+    -30, -40, -40, -50, -50, -40, -40, -30,
+    -30, -40, -40, -50, -50, -40, -40, -30]
+
+def gen_eval():
+    evl=0
+    
+    #check if it is checkmate, return -1000000 if it is white's turn and return 1000000 if it is black's turn
+    if(board.is_checkmate()):
+        if(board.turn):
+            return 1000000
+        else:
+            return -1000000
+        
+    #check if it is stalemate or insufficent materials, return 0
+    if(board.is_stalemate() or board.is_insufficient_material()):
+        return 0
+    
+    #count the number of pieces
+    white_pw=len(board.pieces(chess.PAWN,chess.WHITE))
+    white_kn=len(board.pieces(chess.KNIGHT,chess.WHITE))
+    white_bs=len(board.pieces(chess.BISHOP,chess.WHITE))
+    white_rk=len(board.pieces(chess.ROOK,chess.WHITE))
+    white_qn=len(board.pieces(chess.QUEEN,chess.WHITE))
+    
+    black_pw=len(board.pieces(chess.PAWN,chess.BLACK))
+    black_kn=len(board.pieces(chess.KNIGHT,chess.BLACK))
+    black_bs=len(board.pieces(chess.BISHOP,chess.BLACK))
+    black_rk=len(board.pieces(chess.ROOK,chess.BLACK))
+    black_qn=len(board.pieces(chess.QUEEN,chess.BLACK))
+    
+    #calculate the material evals
+    material=1008*(white_pw-black_pw)+3191*(white_kn-black_kn)+3266*(white_bs-black_bs)+4961*(white_rk-black_rk)+9848*(white_qn-black_qn)
+    
+    #calculate the position evals
+    pw_position_score=0
+    for i in board.pieces(chess.PAWN,chess.WHITE):
+        pw_position_score+=(pawntable[i]*10)        
+    for i in board.pieces(chess.PAWN,chess.BLACK):
+        pw_position_score-=(pawntable[chess.square_mirror(i)]*10)
+        
+    kn_position_score=0
+    for i in board.pieces(chess.KNIGHT,chess.WHITE):
+        kn_position_score+=(knightstable[i]*10)        
+    for i in board.pieces(chess.KNIGHT,chess.BLACK):
+        kn_position_score-=(knightstable[chess.square_mirror(i)]*10)
+    
+    bs_position_score=0
+    for i in board.pieces(chess.BISHOP,chess.WHITE):
+        bs_position_score+=(bishopstable[i]*10)        
+    for i in board.pieces(chess.BISHOP,chess.BLACK):
+        bs_position_score-=(bishopstable[chess.square_mirror(i)]*10)
+    
+    rk_position_score=0
+    for i in board.pieces(chess.ROOK,chess.WHITE):
+        rk_position_score+=(rookstable[i]*10)        
+    for i in board.pieces(chess.ROOK,chess.BLACK):
+        rk_position_score-=(rookstable[chess.square_mirror(i)]*10)
+    
+    qn_position_score=0
+    for i in board.pieces(chess.QUEEN,chess.WHITE):
+        qn_position_score+=(queenstable[i]*10)        
+    for i in board.pieces(chess.QUEEN,chess.BLACK):
+        qn_position_score-=(queenstable[chess.square_mirror(i)]*10)
+    
+    kg_position_score=0
+    for i in board.pieces(chess.KING,chess.WHITE):
+        kg_position_score+=(kingstable[i]*10)        
+    for i in board.pieces(chess.KING,chess.BLACK):
+        kg_position_score-=(kingstable[chess.square_mirror(i)]*10)
+    
+    #print(pw_position_score)
+    
+    evl=material+pw_position_score+kn_position_score+bs_position_score+rk_position_score+qn_position_score+kg_position_score
+    
+    if board.turn:
+        return evl
+    else:
+        return -evl
+    
+def ab(a,b,dep):
+    maximum=1000001
+    if(depth==0):
+        return bottom(a,b)
+    for m in board.legal_moves():
+        board.push(m)
+        evl=-ab(-b,-a,dep-1)
+        board.pop()
+        if(evl>=b):
+            return evl
+        maximum=max(evl,maximum)
+        a=max(evl,maximum)
+    return maximum
+
+def bottom(a,b):
+    evl=gen_eval()
+    if(evl>=b):
+        return b
+    if(a<evl):
+        a=evl
+    for m in board.legal_moves:
+        if board.is_capture(m):
+            board.push(m)
+            evl_bottom=-bottom(-b,-a)
+            board.pop()
+
+            if (evl_bottom>=b):
+                return b
+            if (evl_bottom>a):
+                a=evl_bottom
+    return a
+        
+
+def move(dep):
+    best=chess.Move.null()
+    maximum=-1000000
+    a=-1000001
+    b=1000001
+    for m in board.legal_moves():
+        board.push(m)
+        board_evl=-ab(-b,-a,dep-1)
+        if(board_evl>maximum):
+            maximum=board_evl
+            best=m
+        board.pop(m)
+    return best
+
+board=chess.Board()
+E4 = chess.Move.from_uci("e2e4")
+board.push(E4)
+#board.pop()
+print(board.turn)
+if board.turn:
+    print(gen_eval()/1000)
+else:
+    print(-gen_eval()/1000)
+
+board
