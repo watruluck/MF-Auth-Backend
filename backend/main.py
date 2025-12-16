@@ -1,4 +1,4 @@
-from fastapi import FastAPI, BackgroundTasks
+from fastapi import FastAPI, BackgroundTasks, File, UploadFile
 from pydantic import BaseModel
 import os 
 from functions.email import send_verification_email, send_password_reset_email
@@ -7,6 +7,7 @@ import secrets
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from functions.chess import get_bot_move
+from functions.verifyhuman import verify_human
 
 app = FastAPI()
 
@@ -111,3 +112,11 @@ def get_ai_chess_move(board: Board):
     else:
         return JSONResponse(content={"error": "Failed to get move"}, status_code=400)
 
+
+@app.post("/verify-face/")
+async def verify_face(file: UploadFile = File(...)):
+    contents = await file.read()
+
+    result = await verify_human(contents)
+
+    return result
