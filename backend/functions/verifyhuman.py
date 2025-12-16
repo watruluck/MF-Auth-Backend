@@ -1,28 +1,24 @@
-from fastapi import FastAPI, File, UploadFile
-from tensorflow import keras
+from keras.models import load_model
+from keras.preprocessing import image
 import numpy as np
-from PIL import Image
 import io
+import os
 
-model = keras.models.load_model('../150_epoch_facial_model.keras')
+model_path = os.path.join(os.path.dirname(__file__), '../150_epoch_facial_model.keras')
+model = load_model(model_path)
 
 async def verify_human(file_contents: bytes) -> dict:
-    image = Image.open(io.BytesIO(file_contents))
-    
-    image = image.convert('RGB')
-    image = image.resize((200,200))
-    img_array = np.array(image)
-    img_array = img_array / 255.0  # Normalize
-    img_array = np.expand_dims(img_array, axis=0)  # Add batch dimension
-    
-    # Make prediction
-    prediction = model.predict(img_array)
-    predicted_class = int(prediction[0][0] > 0.5)  # 0 = human, 1 = nonhuman
-    confidence = float(prediction[0][0])
+    photo = image.load_img(io.BytesIO(file_contents), target_size=(200, 200))
+    photo = image.img_to_array(photo)
+
+    photo = np.expand_dims(photo, axis=0)
+    photo = photo/255
+
+    prediction = model.predict(photo)
+
+    predicted_class = int(prediction[0][0] > 0.5)
 
     return {
         "prediction": predicted_class,
-        "label": "nonhuman" if predicted_class == 1 else "human",
-        "confidence": confidence,
-        "is_human": predicted_class == 0
+        "result": "nonhuman" if predicted_class == 1 else "human"
     }

@@ -8,8 +8,24 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from functions.chess import get_bot_move
 from functions.verifyhuman import verify_human
+from tensorflow import keras
+from contextlib import asynccontextmanager
 
-app = FastAPI()
+# Load model at startup
+model = None
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    global model
+    # Load model on startup
+    model_path = os.path.join(os.path.dirname(__file__), 'functions/../150_epoch_facial_model.keras')
+    model = keras.models.load_model(model_path)
+    print("Facial recognition model loaded successfully")
+    yield
+    # Cleanup on shutdown
+    model = None
+
+app = FastAPI(lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
