@@ -134,7 +134,10 @@ def ab(board, a, b, dep):
     maximum=-1000001
     if(dep==0):
         return bottom(board, a, b)
-    for m in board.legal_moves:
+    
+    moves = order_moves(board, list(board.legal_moves))  # Add this
+    
+    for m in moves:  # Use ordered moves
         board.push(m)
         evl=-ab(board, -b, -a, dep-1)
         board.pop()
@@ -161,13 +164,38 @@ def bottom(board, a, b):
             if (evl_bottom>a):
                 a=evl_bottom
     return a
+
+def order_moves(board, moves):
+    """Order moves to search best ones first"""
+    def move_score(m):
+        score = 0
+        # Prioritize captures
+        if board.is_capture(m):
+            # MVV-LVA: Most Valuable Victim - Least Valuable Attacker
+            victim = board.piece_at(m.to_square)
+            attacker = board.piece_at(m.from_square)
+            if victim and attacker:
+                piece_values = {1: 100, 2: 320, 3: 330, 4: 500, 5: 900, 6: 20000}
+                score += piece_values.get(victim.piece_type, 0) - piece_values.get(attacker.piece_type, 0)
+        # Prioritize checks
+        board.push(m)
+        if board.is_check():
+            score += 50
+        board.pop()
+        return score
+    
+    return sorted(moves, key=move_score, reverse=True)
         
 def move(board, dep):
     best=chess.Move.null()
     maximum=-1000000
     a=-1000001
     b=1000001
-    for m in board.legal_moves:
+    
+    # Add move ordering here
+    moves = order_moves(board, list(board.legal_moves))
+    
+    for m in moves:  # Use ordered moves instead of board.legal_moves
         board.push(m)
         board_evl=-ab(board, -b, -a, dep-1)
         if(board_evl>maximum):
@@ -178,18 +206,8 @@ def move(board, dep):
 
 
 # Main API function
-def get_bot_move(fen_string, depth=3):
-    """
-    Takes a FEN string representing the current board state,
-    calculates the best move for Black, and returns the updated FEN.
-    
-    Args:
-        fen_string (str): FEN notation of the current board
-        depth (int): Search depth for the bot (default: 3)
-    
-    Returns:
-        dict: Contains the new FEN, the move made, and game status
-    """
+def get_bot_move(fen_string, depth=2):
+
     try:
         # Create board from FEN
         board = chess.Board(fen_string)
