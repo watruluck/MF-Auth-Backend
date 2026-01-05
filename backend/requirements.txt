@@ -1,0 +1,7 @@
+fastapi
+pydantic
+python-multipart
+tensorflow
+python-chess
+supabase
+python-dotenv
