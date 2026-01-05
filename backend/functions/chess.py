@@ -1,6 +1,6 @@
 import chess
 
-# Evaluating the board
+# Piece positional values
 pawntable = [
     0, 0, 0, 0, 0, 0, 0, 0,
     5, 10, 10, -20, -20, 10, 10, 5,
@@ -61,6 +61,8 @@ kingstable = [
     -30, -40, -40, -50, -50, -40, -40, -30,
     -30, -40, -40, -50, -50, -40, -40, -30]
 
+
+# Evaluate board based on material and location
 def gen_eval(board):
     evl=0
     
@@ -130,6 +132,7 @@ def gen_eval(board):
     else:
         return -evl
     
+
 def ab(board, a, b, dep):
     maximum=-1000001
     if(dep==0):
@@ -206,47 +209,66 @@ def move(board, dep):
 
 
 # Main API function
-def get_bot_move(fen_string, depth=2):
-
+def get_bot_move(fen_string, depth=3):
     try:
         # Create board from FEN
         board = chess.Board(fen_string)
-        # print(fen_string)
-        # print(board.turn)
 
-        # Check if it's Black's turn
+        # Check turn
         if board.turn == chess.WHITE:
             return {
                 "error": "It's White's turn, not Black's",
                 "fen": fen_string
             }
 
-        # Check if game is over
         if board.is_game_over():
             print('game is over')
             print(board.result())
+            result_reason = None
+            if board.is_stalemate():
+                result_reason = "stalemate"
+            elif board.is_insufficient_material():
+                result_reason = "insufficient_material"
+            elif board.is_seventyfive_moves():
+                result_reason = "seventyfive_moves"
+            elif board.is_fivefold_repetition():
+                result_reason = "fivefold_repetition"
+            elif board.is_checkmate():
+                result_reason = "checkmate"
+            elif board.is_variant_draw():
+                result_reason = "variant_draw"
             return {
                 "error": "Game is already over",
                 "fen": fen_string,
                 "game_over": True,
-                "result": board.result()
+                "result": board.result(),
+                "result_reason": result_reason
             }
         
-        # Get best move
         best_move = move(board, depth)
         
-        # Apply the move
         board.push(best_move)
-        # print(board.fen())
-        # print("the move:")
-        # print(best_move)
         
-        # Return result
+        result_reason = None
+        if board.is_game_over():
+            if board.is_stalemate():
+                result_reason = "stalemate"
+            elif board.is_insufficient_material():
+                result_reason = "insufficient_material"
+            elif board.is_seventyfive_moves():
+                result_reason = "seventyfive_moves"
+            elif board.is_fivefold_repetition():
+                result_reason = "fivefold_repetition"
+            elif board.is_checkmate():
+                result_reason = "checkmate"
+            elif board.is_variant_draw():
+                result_reason = "variant_draw"
         return {
             "fen": board.fen(),
             "move": best_move.uci(),
             "game_over": board.is_game_over(),
-            "result": board.result() if board.is_game_over() else None
+            "result": board.result() if board.is_game_over() else None,
+            "result_reason": result_reason
         }
         
     except Exception as e:

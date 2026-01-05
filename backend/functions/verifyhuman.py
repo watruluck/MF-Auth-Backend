@@ -16,6 +16,8 @@ async def verify_human(file_contents: bytes) -> dict:
 
     prediction = model.predict(photo)
 
+
+    # return value of model is number from 0-1, 0 being human and 1 nonhuman.
     predicted_class = int(prediction[0][0] > 0.5)
 
     return {
