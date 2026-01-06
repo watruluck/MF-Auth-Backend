@@ -49,6 +49,7 @@ class Board(BaseModel):
     depth: int
 
 @app.get("/")
+@app.head("/")
 def health_check():
     return {"status": "ok", "message": "MF-Auth Backend is running"}
  
