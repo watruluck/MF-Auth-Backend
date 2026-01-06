@@ -11,8 +11,6 @@ from functions.verifyhuman import verify_human
 from tensorflow import keras
 from contextlib import asynccontextmanager
 
-const port = process.env.PORT || 8000
-
 # Load model at startup
 model = None
 
@@ -50,9 +48,9 @@ class Board(BaseModel):
     fen: str
     depth: int
 
-@app.get('/', (req,res) => {
-    res.send('MF Auth Backend is running')
-})
+@app.get("/")
+def health_check():
+    return {"status": "ok", "message": "MF-Auth Backend is running"}
  
 @app.post("/signup")
 def create_user(user: User):
