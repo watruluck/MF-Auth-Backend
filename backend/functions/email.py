@@ -1,16 +1,19 @@
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+import os
+from dotenv import load_dotenv
 
-SENDER_EMAIL = "watruluck@gmail.com"
-SENDER_PASSWORD = "wzva svui jsma kpuu"  # replace when in production
+load_dotenv()
+
+SENDER_EMAIL = os.environ.get("SENDER_EMAIL")
+SENDER_PASSWORD = os.environ.get("SENDER_PASSWORD")
 
 def send_verification_email(to_email: str, user: str, token: str):
     msg = MIMEMultipart()
-    body = "http://localhost:5173/verify/" + token
+    body = "http://wtruluck-project.com/verify/" + token
     msg["From"] = SENDER_EMAIL
-    msg["To"] = "watruluck@gmail.com"
-    # msg["To"] = to_email
+    msg["To"] = to_email
     msg["Subject"] = "Hello " + user + ", please verify your email"
     msg.attach(MIMEText(body, "plain"))
 
@@ -27,7 +30,7 @@ def send_verification_email(to_email: str, user: str, token: str):
 
 def send_password_reset_email(to_email: str, user: str, token: str):
     msg = MIMEMultipart()
-    body = "http://localhost:5173/password-change/" + token
+    body = "http://wtruluck-project.com/password-change/" + token
     msg["From"] = SENDER_EMAIL
     msg["To"] = to_email
     msg["Subject"] = "Hello " + user + ", reset your password"
