@@ -6,3 +6,4 @@ tensorflow
 python-chess
 supabase
 python-dotenv
+sendgrid

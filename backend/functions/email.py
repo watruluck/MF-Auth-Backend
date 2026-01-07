@@ -1,40 +1,34 @@
-import smtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail
 import os
 from dotenv import load_dotenv
 
 load_dotenv()
 
-SENDER_EMAIL = os.environ.get("SENDER_EMAIL")
-SENDER_PASSWORD = os.environ.get("SENDER_PASSWORD")
+SENDGRID_EMAIL = os.environ.get("SENDGRID_EMAIL")
+SENDGRID_KEY = os.environ.get("SENDGRID_KEY")
 
 # Debug logging - check if env vars are loaded
-print(f"Email config - SENDER_EMAIL: {SENDER_EMAIL}")
-print(f"Email config - SENDER_PASSWORD: {'SET' if SENDER_PASSWORD else 'NOT SET'}")
-if not SENDER_EMAIL or not SENDER_PASSWORD:
+print(f"Email config - SENDGRID_EMAIL: {SENDGRID_EMAIL}")
+print(f"Email config - SENDGRID_KEY: {'SET' if SENDGRID_KEY else 'NOT SET'}")
+if not SENDGRID_EMAIL or not SENDGRID_KEY:
     print("WARNING: Email credentials not properly configured!")
 
 def send_verification_email(to_email: str, user: str, token: str):
     print(f"Attempting to send verification email to {to_email}")
-    msg = MIMEMultipart()
-    body = "http://wtruluck-project.com/verify/" + token
-    msg["From"] = SENDER_EMAIL
-    msg["To"] = to_email
-    msg["Subject"] = "Hello " + user + ", please verify your email"
-    msg.attach(MIMEText(body, "plain"))
-
-    # Connect to Gmail SMTP
+    
+    message = Mail(
+        from_email=SENDGRID_EMAIL,
+        to_emails=to_email,
+        subject=f"Hello {user}, please verify your email",
+        html_content=f'<p>Click the link below to verify your email:</p><p><a href="http://wtruluck-project.com/verify/{token}">http://wtruluck-project.com/verify/{token}</a></p>'
+    )
+    
     try:
-        print("Connecting to Gmail SMTP...")
-        with smtplib.SMTP("smtp.gmail.com", 587, timeout=10) as server:
-            print("Starting TLS...")
-            server.starttls()
-            print("Logging in...")
-            server.login(SENDER_EMAIL, SENDER_PASSWORD)
-            print("Sending message...")
-            server.send_message(msg)
-        print("Email sent successfully!")
+        print("Sending email via SendGrid...")
+        sg = SendGridAPIClient(SENDGRID_KEY)
+        response = sg.send(message)
+        print(f"Email sent successfully! Status code: {response.status_code}")
         return True
     except Exception as e:
         error_msg = f"Failed to send email: {str(e)}"
@@ -43,19 +37,22 @@ def send_verification_email(to_email: str, user: str, token: str):
 
 
 def send_password_reset_email(to_email: str, user: str, token: str):
-    msg = MIMEMultipart()
-    body = "http://wtruluck-project.com/password-change/" + token
-    msg["From"] = SENDER_EMAIL
-    msg["To"] = to_email
-    msg["Subject"] = "Hello " + user + ", reset your password"
-    msg.attach(MIMEText(body, "plain"))
-
-    # Connect to Gmail SMTP
+    print(f"Attempting to send password reset email to {to_email}")
+    
+    message = Mail(
+        from_email=SENDGRID_EMAIL,
+        to_emails=to_email,
+        subject=f"Hello {user}, reset your password",
+        html_content=f'<p>Click the link below to reset your password:</p><p><a href="http://wtruluck-project.com/password-change/{token}">http://wtruluck-project.com/password-change/{token}</a></p>'
+    )
+    
     try:
-        with smtplib.SMTP("smtp.gmail.com", 587, timeout=10) as server:
-            server.starttls()
-            server.login(SENDER_EMAIL, SENDER_PASSWORD)
-            server.send_message(msg)
+        print("Sending email via SendGrid...")
+        sg = SendGridAPIClient(SENDGRID_KEY)
+        response = sg.send(message)
+        print(f"Email sent successfully! Status code: {response.status_code}")
         return True
     except Exception as e:
-        return "Failed to send email: " + str(e) 
+        error_msg = f"Failed to send email: {str(e)}"
+        print(error_msg)
+        return error_msg 
