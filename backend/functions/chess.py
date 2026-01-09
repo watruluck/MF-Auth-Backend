@@ -169,7 +169,7 @@ def bottom(board, a, b):
     return a
 
 def order_moves(board, moves):
-    """Order moves to search best ones first"""
+    # Order moves to search best ones first
     def move_score(m):
         score = 0
         # Prioritize captures
@@ -195,10 +195,9 @@ def move(board, dep):
     a=-1000001
     b=1000001
     
-    # Add move ordering here
     moves = order_moves(board, list(board.legal_moves))
     
-    for m in moves:  # Use ordered moves instead of board.legal_moves
+    for m in moves:
         board.push(m)
         board_evl=-ab(board, -b, -a, dep-1)
         if(board_evl>maximum):
@@ -214,7 +213,6 @@ def get_bot_move(fen_string, depth=3):
         # Create board from FEN
         board = chess.Board(fen_string)
 
-        # Check turn
         if board.turn == chess.WHITE:
             return {
                 "error": "It's White's turn, not Black's",
