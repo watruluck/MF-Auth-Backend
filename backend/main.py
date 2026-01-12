@@ -20,7 +20,6 @@ async def lifespan(app: FastAPI):
     # Load model on startup
     model_path = os.path.join(os.path.dirname(__file__), 'functions/../150_epoch_facial_model.keras')
     model = keras.models.load_model(model_path)
-    print("Facial recognition model loaded successfully")
     yield
     # Cleanup on shutdown
     model = None
@@ -55,21 +54,16 @@ def health_check():
  
 @app.post("/signup")
 def create_user(user: User):
-    print('check1')
     if check_email(user.email):
         return -1
 
     token = secrets.token_urlsafe(16)
-    print('check2')
     if not add_user(user.email, user.name, user.password, token):
         return -2
 
-    # if not update_verification_string(user.email, token):
-    #     return -3
-    print('check3')
     if not send_verification_email(user.email, user.name, token):
         return -3
-    print('check4')
+
     return 0
 
 @app.post("/login")

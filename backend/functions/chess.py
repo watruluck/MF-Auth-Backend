@@ -220,8 +220,6 @@ def get_bot_move(fen_string, depth=3):
             }
 
         if board.is_game_over():
-            print('game is over')
-            print(board.result())
             result_reason = None
             if board.is_stalemate():
                 result_reason = "stalemate"

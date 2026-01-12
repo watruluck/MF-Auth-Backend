@@ -8,14 +8,7 @@ load_dotenv()
 SENDGRID_EMAIL = os.environ.get("SENDGRID_EMAIL")
 SENDGRID_KEY = os.environ.get("SENDGRID_KEY")
 
-# Debug logging - check if env vars are loaded
-print(f"Email config - SENDGRID_EMAIL: {SENDGRID_EMAIL}")
-print(f"Email config - SENDGRID_KEY: {'SET' if SENDGRID_KEY else 'NOT SET'}")
-if not SENDGRID_EMAIL or not SENDGRID_KEY:
-    print("WARNING: Email credentials not properly configured!")
-
 def send_verification_email(to_email: str, user: str, token: str):
-    print(f"Attempting to send verification email to {to_email}")
     
     message = Mail(
         from_email=SENDGRID_EMAIL,
@@ -25,19 +18,15 @@ def send_verification_email(to_email: str, user: str, token: str):
     )
     
     try:
-        print("Sending email via SendGrid...")
         sg = SendGridAPIClient(SENDGRID_KEY)
         response = sg.send(message)
-        print(f"Email sent successfully! Status code: {response.status_code}")
         return True
     except Exception as e:
         error_msg = f"Failed to send email: {str(e)}"
-        print(error_msg)
         return error_msg
 
 
 def send_password_reset_email(to_email: str, user: str, token: str):
-    print(f"Attempting to send password reset email to {to_email}")
     
     message = Mail(
         from_email=SENDGRID_EMAIL,
@@ -47,12 +36,9 @@ def send_password_reset_email(to_email: str, user: str, token: str):
     )
     
     try:
-        print("Sending email via SendGrid...")
         sg = SendGridAPIClient(SENDGRID_KEY)
         response = sg.send(message)
-        print(f"Email sent successfully! Status code: {response.status_code}")
         return True
     except Exception as e:
         error_msg = f"Failed to send email: {str(e)}"
-        print(error_msg)
         return error_msg 
