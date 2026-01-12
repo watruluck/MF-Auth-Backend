@@ -17,18 +17,16 @@ model = None
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     global model
-    # Load model on startup
     model_path = os.path.join(os.path.dirname(__file__), 'functions/../150_epoch_facial_model.keras')
     model = keras.models.load_model(model_path)
     yield
-    # Cleanup on shutdown
     model = None
 
 app = FastAPI(lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # change to ["http://localhost:5173"] in production
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
