@@ -1,13 +1,8 @@
-from keras.models import load_model
 from keras.preprocessing import image
 import numpy as np
 import io
-import os
 
-model_path = os.path.join(os.path.dirname(__file__), '../models/150_epoch_facial_model.keras')
-model = load_model(model_path)
-
-async def verify_human(file_contents: bytes) -> dict:
+async def verify_human(file_contents: bytes, model) -> dict:
     photo = image.load_img(io.BytesIO(file_contents), target_size=(200, 200))
     photo = image.img_to_array(photo)
 

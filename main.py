@@ -130,7 +130,7 @@ def get_ai_chess_move(board: Board):
 async def verify_face(file: UploadFile = File(...)):
     contents = await file.read()
 
-    result = await verify_human(contents)
+    result = await verify_human(contents, model)
 
     return result
 
