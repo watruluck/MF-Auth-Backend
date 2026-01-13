@@ -62,8 +62,8 @@ kingstable = [
     -30, -40, -40, -50, -50, -40, -40, -30]
 
 
-# Evaluate board based on material and location
 def gen_eval(board):
+    """Evaluate board based on material and location"""
     evl=0
     
     if(board.is_checkmate()):
@@ -134,13 +134,14 @@ def gen_eval(board):
     
 
 def ab(board, a, b, dep):
+    """Recursive Alpha-beta pruning search to given depth"""
     maximum=-1000001
     if(dep==0):
         return bottom(board, a, b)
     
-    moves = order_moves(board, list(board.legal_moves))  # Add this
+    moves = order_moves(board, list(board.legal_moves))
     
-    for m in moves:  # Use ordered moves
+    for m in moves:
         board.push(m)
         evl=-ab(board, -b, -a, dep-1)
         board.pop()
@@ -151,6 +152,7 @@ def ab(board, a, b, dep):
     return maximum
 
 def bottom(board, a, b):
+    """Quiescence search - evaluate only capture moves to avoid horizon effect (high potential for blunders)"""
     evl=gen_eval(board)
     if(evl>=b):
         return b
@@ -169,10 +171,10 @@ def bottom(board, a, b):
     return a
 
 def order_moves(board, moves):
-    # Order moves to search best ones first
+    """Order moves for alpha-beta pruning efficiency (captures and checks first)"""
     def move_score(m):
         score = 0
-        # Prioritize captures
+        # Prioritize captures using MVV-LVA (Most Valuable Victim - Least Valuable Attacker)
         if board.is_capture(m):
             # MVV-LVA: Most Valuable Victim - Least Valuable Attacker
             victim = board.piece_at(m.to_square)
@@ -180,7 +182,6 @@ def order_moves(board, moves):
             if victim and attacker:
                 piece_values = {1: 100, 2: 320, 3: 330, 4: 500, 5: 900, 6: 20000}
                 score += piece_values.get(victim.piece_type, 0) - piece_values.get(attacker.piece_type, 0)
-        # Prioritize checks
         board.push(m)
         if board.is_check():
             score += 50
@@ -190,6 +191,7 @@ def order_moves(board, moves):
     return sorted(moves, key=move_score, reverse=True)
         
 def move(board, dep):
+    """Find best move using alpha-beta pruning at specified depth"""
     best=chess.Move.null()
     maximum=-1000000
     a=-1000001
@@ -207,10 +209,10 @@ def move(board, dep):
     return best
 
 
-# Main API function
 def get_bot_move(fen_string, depth=3):
+    """Check if game is over and get best move for black"""
     try:
-        # Create board from FEN
+        # Create board from FEN notation
         board = chess.Board(fen_string)
 
         if board.turn == chess.WHITE:

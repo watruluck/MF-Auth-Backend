@@ -11,11 +11,12 @@ from functions.verifyhuman import verify_human
 from tensorflow import keras
 from contextlib import asynccontextmanager
 
-# Load model at startup
+# Global model variable loaded once at startup
 model = None
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    """Load CNN model at startup, cleanup on shutdown"""
     global model
     model_path = os.path.join(os.path.dirname(__file__), 'functions/../models/150_epoch_facial_model.keras')
     model = keras.models.load_model(model_path)
@@ -52,13 +53,17 @@ def health_check():
  
 @app.post("/signup")
 def create_user(user: User):
+    """Create new user account and send verification email"""
+    # Check if email already exists
     if check_email(user.email):
         return -1
 
+    # Generate verification token and create user with hashed password
     token = secrets.token_urlsafe(16)
     if not add_user(user.email, user.name, user.password, token):
         return -2
 
+    # Send verification email with token link
     if not send_verification_email(user.email, user.name, token):
         return -3
 
@@ -66,13 +71,16 @@ def create_user(user: User):
 
 @app.post("/login")
 def login_user(user: LoginUser):
-
+    """Authenticate user with email and password"""
+    # Verify email exists
     if not check_email(user.email):
         return -1
 
+    # Check password against bcrypt hash
     if check_password(user.email, user.password) == False:
         return -2
 
+    # Ensure email is verified
     if not check_is_verified(user.email):
         return -3
 
@@ -80,6 +88,7 @@ def login_user(user: LoginUser):
 
 @app.post("/verify/{token}")
 def verify_email(token: str):
+    """Verify user's email using token from verification link"""
     response = verify_user(token)
 
     if not response:
@@ -89,7 +98,8 @@ def verify_email(token: str):
 
 @app.post("/startreset/{email}")
 def start_password_reset(email: str):
-
+    """Initiate password reset process by sending email with token"""
+    # Check if email exists in database
     if not check_email(email):
         return -1
     
@@ -107,7 +117,8 @@ def start_password_reset(email: str):
 
 @app.post("/resetpassword/{token}/{new_password}")
 def reset_password(token: str, new_password: str):
-
+    """Update user password using token from reset email"""
+    # Update password with bcrypt hash
     response = update_password(token, new_password)
 
     if response:
@@ -117,7 +128,8 @@ def reset_password(token: str, new_password: str):
 
 @app.post("/aichessmove")
 def get_ai_chess_move(board: Board):
-
+    """Generate AI chess move"""
+    # Get best move for black at specified depth
     response = get_bot_move(board.fen, board.depth)
 
     if response:
@@ -128,8 +140,10 @@ def get_ai_chess_move(board: Board):
 
 @app.post("/verify-face/")
 async def verify_face(file: UploadFile = File(...)):
+    """Verify human face in uploaded image"""
     contents = await file.read()
 
+    # Run image through trained facial recognition model
     result = await verify_human(contents, model)
 
     return result

@@ -13,13 +13,15 @@ FastAPI backend for my multi-factor authentication system. Handles user auth wit
 ## Project Structure
 
 ```
-backend/
+.
 ├── main.py                          # All API routes and FastAPI app
-├── 150_epoch_facial_model.keras     # Pre-trained face detection model
-├── modeltraining.py                 # Script to retrain the face model
 ├── requirements.txt                 # Python dependencies
+├── .env.example                     # Environment variables template
+├── models/
+│   ├── 150_epoch_facial_model.keras # Pre-trained face detection model
+│   └── modeltraining.py             # Script to retrain the face model
 └── functions/
-    ├── chess.py                     # Chess AI (minimax + piece-square tables)
+    ├── chess.py                     # Chess AI (alpha-beta pruning + piece-square tables)
     ├── email.py                     # SendGrid email functions
     ├── users.py                     # Supabase user operations
     └── verifyhuman.py               # Face verification using the Keras model
@@ -37,7 +39,7 @@ backend/
 - Loads a custom Keras model (trained for 150 epochs) on startup
 - Accepts image uploads, resizes to 200x200, normalizes pixel values
 - Returns prediction (human vs non-human) with confidence score
-- Training code included in `modeltraining.py`
+- Training code included in `models/modeltraining.py`
 
 ### Chess AI
 - Minimax algorithm with alpha-beta pruning
@@ -54,17 +56,13 @@ backend/
 
 ## Setup
 
-Create `.env` file:
-```env
-SUPABASE_URL=your_url
-SUPABASE_SECRET_KEY=your_key
-SENDGRID_EMAIL=your_email
-SENDGRID_KEY=your_key
+Copy `.env.example` to `.env` and fill in your credentials:
+```bash
+cp .env.example .env
 ```
 
 Install and run:
 ```bash
-cd backend
 pip install -r requirements.txt
 uvicorn main:app --reload
 ```

@@ -7,3 +7,4 @@ python-chess
 supabase
 python-dotenv
 sendgrid
+bcrypt

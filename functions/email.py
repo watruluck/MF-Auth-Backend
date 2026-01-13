@@ -9,7 +9,7 @@ SENDGRID_EMAIL = os.environ.get("SENDGRID_EMAIL")
 SENDGRID_KEY = os.environ.get("SENDGRID_KEY")
 
 def send_verification_email(to_email: str, user: str, token: str):
-    
+    """Send email verification link via SendGrid"""
     message = Mail(
         from_email=SENDGRID_EMAIL,
         to_emails=to_email,
@@ -27,7 +27,7 @@ def send_verification_email(to_email: str, user: str, token: str):
 
 
 def send_password_reset_email(to_email: str, user: str, token: str):
-    
+    """Send password reset link via SendGrid"""
     message = Mail(
         from_email=SENDGRID_EMAIL,
         to_emails=to_email,
