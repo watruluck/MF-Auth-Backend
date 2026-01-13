@@ -17,7 +17,7 @@ model = None
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     global model
-    model_path = os.path.join(os.path.dirname(__file__), 'functions/../150_epoch_facial_model.keras')
+    model_path = os.path.join(os.path.dirname(__file__), 'functions/../models/150_epoch_facial_model.keras')
     model = keras.models.load_model(model_path)
     yield
     model = None
