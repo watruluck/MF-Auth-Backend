@@ -4,7 +4,7 @@ import numpy as np
 import io
 import os
 
-model_path = os.path.join(os.path.dirname(__file__), '../150_epoch_facial_model.keras')
+model_path = os.path.join(os.path.dirname(__file__), '../models/150_epoch_facial_model.keras')
 model = load_model(model_path)
 
 async def verify_human(file_contents: bytes) -> dict:
